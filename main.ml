@@ -102,6 +102,22 @@ let construct_huff_tree l =
 
     construct (0, Nil) (0, Nil) l
 
+let tree_to_arr tr = 
+    let rec loop tr' str =
+        match tr' with
+        | Nil -> []
+        | Leaf x -> [ (x, str) ]
+        | Node (x, y) -> 
+                (loop x (str ^ "0")) @ (loop y (str ^ "1"))
+    in
+    let temp_res = loop tr "" in
+
+    let comp el1 el2 =
+        compare (el1 |> snd |> String.length) (el2 |> snd |> String.length)
+    in
+
+    List.sort comp temp_res
+
 let res = text_var |> count_occs |> sort_count_occs
 let () = print_occ_list res
 
@@ -117,8 +133,15 @@ let rec print_tree count = function
             Printf.printf ")%d\n" count;
             ()
 
+(* let () = print_endline "" *)
+(* let () = print_tree 0 ( res |> construct_huff_tree )  *)
 let () = print_endline ""
-let () = print_tree 0 ( res |> construct_huff_tree ) 
+
+let rec print_tree_arr = function
+    | [] -> ()
+    | h :: t -> Printf.printf "(symbol: %c, code: %s), " (fst h) (snd h); print_tree_arr t; ()
+
+let () = res |> construct_huff_tree |> tree_to_arr |> print_tree_arr
 
 (* | h :: t -> begin 
 
