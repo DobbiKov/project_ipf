@@ -1,9 +1,11 @@
-let text_var = "satisfaisant"
+let text_var = "hello my world! How are you doing?"
 
 type tree = 
     Leaf of char
     | Node of tree * tree
     | Nil
+
+let explode s = List.init (String.length s) (String.get s)
 
 let count_occs text = 
 
@@ -118,6 +120,91 @@ let tree_to_arr tr =
 
     List.sort comp temp_res
 
+let rec char_to_byte c table =
+    match table with 
+    | [] -> failwith "haven't found any c occurences"
+    | h :: t when (fst h) = c -> snd h
+    | h :: t -> char_to_byte c t
+
+let build_compression_table text = 
+    let occs = text |> count_occs |> sort_count_occs in
+    let tree = occs |> construct_huff_tree in
+    let comp_table = tree |> tree_to_arr in
+    comp_table
+
+let compress_text text = 
+    let comp_table = build_compression_table text in
+    let rec table_to_str = function
+        | [] -> ""
+        | h :: t -> (snd h) ^ " " ^ (h |> fst |> Char.code |> string_of_int) ^ " " ^ (t |> table_to_str)
+    in
+    let str_table = comp_table |> table_to_str in
+
+    let f acc x = 
+        acc ^ (char_to_byte x comp_table)
+    in
+    let table_len_str = comp_table |> List.length |> string_of_int in
+    let compressed_text = ( String.fold_left f "" text ) in
+    table_len_str ^ " " ^ str_table ^ compressed_text 
+
+let rec find_byte_to_char str table =
+    match table with 
+    | [] -> (false, ' ')
+    | h :: t when str = snd h -> (true, fst h)
+    | h :: t -> find_byte_to_char str t
+
+let decompress_text compressed_text = 
+    let list_of_chars = explode compressed_text in
+
+    let rec read_til_space l =
+        match l with
+        | [] -> ("", [])
+        | h :: t when h = ' ' -> ("", t)
+        | h :: t -> begin
+            let temp_res = read_til_space t in
+            ((Char.escaped h) ^ (fst temp_res), snd temp_res)
+        end
+    in
+
+    let (tab_len_str, rest_of_text) = read_til_space list_of_chars in
+    let tab_len = tab_len_str |> int_of_string in
+
+    let rec elems_for_table acc l len =
+        if len = 0 then (acc, l)
+        else 
+            let (key, res_l) = read_til_space l in
+            let (value, res_res_l) = read_til_space res_l in
+            elems_for_table ((key, value) :: acc) res_res_l (len - 1)
+        
+    in
+
+    let (list_of_elems_for_table, rest_of_text2) = elems_for_table [] rest_of_text tab_len in
+
+    let rec construct_table = function
+        | [] -> [] 
+        | h :: t -> (h |> snd |> int_of_string |> Char.chr, h |> fst) :: construct_table  t
+    in
+
+    let table = construct_table list_of_elems_for_table in
+
+    let rec bytes_to_text curr rest tab = 
+        match rest with 
+        | [] -> begin
+            let (is_found, found_symb) = find_byte_to_char curr tab in
+            if not is_found then ""
+            else found_symb |> Char.escaped 
+        end
+        | h :: t -> begin 
+            let (is_found, found_symb) = find_byte_to_char curr tab in
+            if is_found then (found_symb |> Char.escaped) ^ (bytes_to_text (h |> Char.escaped) t tab)
+            else bytes_to_text (curr ^ (h |> Char.escaped)) t tab
+        end
+    in
+    bytes_to_text "" rest_of_text2 table
+
+
+
+
 let res = text_var |> count_occs |> sort_count_occs
 let () = print_occ_list res
 
@@ -142,6 +229,13 @@ let rec print_tree_arr = function
     | h :: t -> Printf.printf "(symbol: %c, code: %s), " (fst h) (snd h); print_tree_arr t; ()
 
 let () = res |> construct_huff_tree |> tree_to_arr |> print_tree_arr
+
+let comps_text = compress_text text_var
+let () = Printf.printf "\n%s\n" comps_text
+let new_table = decompress_text comps_text 
+let () = Printf.printf "%s\n" new_table
+(*let () = List.iter (fun x -> Printf.printf "%s %s " (fst x) (snd x)) new_table*)
+(*let () = print_tree_arr new_table *)
 
 (* | h :: t -> begin 
 
