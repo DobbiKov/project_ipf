@@ -2,3 +2,4 @@
 *.cm*
 _build/
 *.exe
+*.txt
