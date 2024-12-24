@@ -1,5 +1,5 @@
 let decompress file_name = 
-    let bytes = file_name |> Read_file.read_file_in_bytes_for_compression in
+    let bytes = file_name |> Read_file.read_file_in_short_for_decompression in
     let huff_tree_a, rest = Huff_tree.compressed_file_bytes_to_huff_tree_arr bytes in
     let new_fname = String.sub file_name 0 ( (String.length file_name) - 3 ) in
     Write_file.write_decompressed_file new_fname huff_tree_a rest

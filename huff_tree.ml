@@ -61,7 +61,7 @@ let tree_to_arr tr =
     let rec loop tr' integer count =
         match tr' with
         | Nil -> []
-        | Leaf x -> [ (x, integer * (pow 2 (8 - count))) ]
+        | Leaf x -> [ (x, integer * (pow 2 (32 - count))) ]
         | Node (x, y) -> 
                 (loop x (integer * 2) (count + 1)) @ (loop y ((integer * 2) + 1) (count + 1))
     in
