@@ -24,6 +24,7 @@ let of_in_channel (channel : in_channel) =
   { buffer; len; index = 0; channel }
 
 let read_bit (is : istream) =
+    (*Printf.printf "Buffer: %d, Len: %d, Index: %d\n" is.buffer is.len is.index;*)
   let i = is.index in
   if is.len = 24 then
     if is.index < 7 then begin
@@ -44,11 +45,14 @@ let read_bit (is : istream) =
       res
     end
   else (* len = 16 *)
-    let num_bits = (is.buffer lsr 8) land 0xff in
-    if num_bits >= 8 then invalid_stream ()
-    else if i < num_bits then begin
+    (*let num_bits = (is.buffer lsr 8) land 0xff in*)
+    let num_bits = is.len in
+    (*if num_bits >= 8 then invalid_stream ()*)
+    if i < num_bits then begin
+        let bit = (is.buffer lsr is.index) land 1 in 
       is.index <- i + 1;
-      (is.buffer lsr i) land 1
+      (*(is.buffer lsr i) land 1*)
+      bit
     end
     else raise End_of_stream
 

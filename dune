@@ -1,1 +1,2 @@
-(executables (names read_file) (modules bs read_file))
+(executables (names main) (modules bs read_file occ_arr huff_tree main))
+(executable (name old_main))
