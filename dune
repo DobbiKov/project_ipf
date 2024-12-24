@@ -1,2 +1,2 @@
-(executables (names main) (modules bs read_file occ_arr huff_tree main))
+(executables (names main cli) (modules bs read_file occ_arr huff_tree write_file huffman main cli))
 (executable (name old_main))
