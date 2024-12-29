@@ -73,6 +73,42 @@ let tree_to_arr tr =
 
     ( List.sort comp temp_res ) |> List.rev
 
+let tree_to_arr_2 tr = 
+    let rec loop tr' arr count =
+        match tr' with
+        | Nil -> []
+        | Leaf x -> [ (x, arr |> List.rev) ]
+        | Node (x, y) -> 
+                (loop x (0 :: arr) (count + 1)) @ (loop y (1 :: arr) (count + 1))
+    in
+    let temp_res = loop tr [] 0 in
+
+    let comp el1 el2 =
+        compare (el1 |> snd) (el2 |> snd)
+    in
+
+    let res = ( List.sort comp temp_res ) in
+    let last, without_last  = match res with
+    | [] -> ((0, []), [])
+    | h :: t -> (h, t |> List.rev) 
+    in
+
+    let first, without_first = match without_last with
+    | [] -> ((0, []), [])
+    | h :: t -> (h, t) 
+    in
+
+    first :: last :: without_first
+
+
+
+let rec is_compr_byte_in_tree_tab bits_str huff_tab = 
+    match huff_tab with
+    | [] -> false 
+    | h :: t -> 
+            if (snd h) = bits_str then true 
+            else is_compr_byte_in_tree_tab bits_str t 
+
 let rec get_compressed_byte_in_huff_tree_tab huff_tree_tab key =
     match huff_tree_tab with
     | [] -> raise ( Invalid_argument "the byte isn't found in the tab" )
@@ -82,7 +118,8 @@ let rec get_compressed_byte_in_huff_tree_tab huff_tree_tab key =
 
 let rec get_byte_in_huff_tree_tab huff_tree_tab value =
     match huff_tree_tab with
-    | [] -> raise ( Invalid_argument "the compressed byte isn't found in the tab" )
+    (*| [] -> raise ( Invalid_argument "the compressed byte isn't found in the tab" )*)
+    | [] -> 0 
     | h :: t -> 
             if (snd h) = value then fst h
             else get_byte_in_huff_tree_tab t value
@@ -123,3 +160,19 @@ let compressed_file_bytes_to_huff_tree_arr compr_bytes =
     if tab_len = 0 then ([], rest)
     else 
         loop tab_len rest []
+
+let rec bit_tab_to_str tab =
+    match tab with
+    | [] -> ""
+    | h :: t -> (h |> string_of_int) ^ (t |> bit_tab_to_str)
+
+let huff_tree_with_arr_to_huff_tree_with_str tab =
+    let rec aux acc ttab =
+        match ttab with
+        | [] -> acc
+        | h :: t -> 
+                let byte = h |> fst in
+                let str =  h |> snd |> bit_tab_to_str in
+                aux ((byte, str) :: acc) t
+    in
+    aux [] tab
