@@ -5,6 +5,19 @@ type tree =
     | Node of tree * tree
     | Nil
 
+let int_to_bits n =
+  (* Converts an integer (0-255) to an array of 8 bits *)
+  if n < 0 || n > 255 then
+    invalid_arg "Input must be in the range 0-255"
+  else
+    let rec to_bits n count acc =
+      if count = 0 then acc
+      else
+        let bit = n land 1 in
+        to_bits (n lsr 1) (count - 1) (bit :: acc)
+    in
+    to_bits n 8 []
+
 let construct_huff_tree l =
 
     let rec construct left right acc = 
@@ -98,9 +111,28 @@ let tree_to_arr_2 tr =
     | h :: t -> (h, t) 
     in
 
-    first :: last :: without_first
+    first  :: last :: without_first
 
 
+let process_huff_tree_tab huff_tree = 
+    let rec sep_first_elem h_t acc1 acc2 = 
+        match h_t with
+        | [] -> [], [], []
+        | h :: t ->
+                t, (acc1 @ (h |> fst |> int_to_bits)), (acc2 @ (h |> snd))
+    in
+    let rec separate_lists h_t acc1 acc2 = 
+        match h_t with
+        | [] -> acc1, acc2
+        | h :: t ->
+                separate_lists t (acc1 @ (h |> fst |> int_to_bits)) (acc2 @ (h |> snd))
+    in
+    let h_t_1, f_vals, f_comp_bits = sep_first_elem huff_tree [] [] in
+    let h_t_2, s_vals, s_comp_bits = sep_first_elem h_t_1 f_vals (f_comp_bits @ [0]) in
+    let vals, comp_bits = separate_lists h_t_2 s_vals (s_comp_bits @ [1]) in
+    List.iter (Printf.printf "%d") vals;
+    List.iter (Printf.printf "%d") comp_bits;
+    vals @ comp_bits
 
 let rec is_compr_byte_in_tree_tab bits_str huff_tab = 
     match huff_tab with
@@ -124,12 +156,20 @@ let rec get_byte_in_huff_tree_tab huff_tree_tab value =
             if (snd h) = value then fst h
             else get_byte_in_huff_tree_tab t value
 
+            (*temp*)
+let rec print_bit_tab = function 
+    | [] -> ()
+    | h :: t -> Printf.printf "%d" h; print_bit_tab t
+
 let bytes_to_compressed_bytes huff_tree_tab bytes_tab = 
     let rec loop acc bt = 
         match bt with
         | [] -> acc
         | h :: t -> 
                 let comp_byte = get_compressed_byte_in_huff_tree_tab huff_tree_tab h in 
+                print_bit_tab comp_byte;
+                Printf.printf " - ";
+                Printf.printf "%d - %c\n" (h) ( h |> Char.chr );
                 loop (comp_byte :: acc) t 
     in
     loop [] bytes_tab

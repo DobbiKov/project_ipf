@@ -20,14 +20,14 @@ let rec print_arr_of_bits arr =
     | [] -> ""
     | h :: t -> ( string_of_int h ) ^ (t |> print_arr_of_bits)
 
-let huff_tree_a = file_name |> Read_file.read_file_in_bytes_for_compression |> Occ_arr.construct_occs_table |> Huff_tree.construct_huff_tree |> Huff_tree.tree_to_arr_2
-let () = List.iter (fun x -> Printf.printf "%c - %s\n" (x |> fst |> Char.chr) (( snd x ) |> Huff_tree.bit_tab_to_str)) huff_tree_a
+(*let huff_tree_a = file_name |> Read_file.read_file_in_bytes_for_compression |> Occ_arr.construct_occs_table |> Huff_tree.construct_huff_tree |> Huff_tree.tree_to_arr_2*)
+(*let () = List.iter (fun x -> Printf.printf "%c - %s\n" (x |> fst |> Char.chr) (( snd x ) |> Huff_tree.bit_tab_to_str)) huff_tree_a*)
 (*let () = Write_file.write_compressed_file "temp_file.hf" huff_tree_a bytes*)
 (*let () = List.iter (fun x -> Printf.printf "%d - %d\n" (fst x) (( snd x ))) huff_tree_a*)
 
-let () = print_endline "\n"
-let huff_tab, rest = "temp_file.txt.hf" |> Read_file.read_file_for_decompress 
-let () = Printf.printf "tab len: %d\n" (huff_tab |> List.length)
-let () = List.iter (fun x -> Printf.printf "%c - %s\n" (x |> fst |> Char.chr) (( snd x ))) huff_tab 
-let () = List.iter (fun x -> Printf.printf "%s " x) ( rest |> List.rev )  
-let () = List.iter (fun x -> Printf.printf "%c " ( ( Huff_tree.get_byte_in_huff_tree_tab huff_tab x ) |> Char.chr )) ( rest |> List.rev )  
+(*let () = print_endline "\n"*)
+(*let huff_tab, rest = "temp_file.txt.hf" |> Read_file.read_file_for_decompress *)
+(*let () = Printf.printf "tab len: %d\n" (huff_tab |> List.length)*)
+(*let () = List.iter (fun x -> Printf.printf "%c - %s\n" (x |> fst |> Char.chr) (( snd x ))) huff_tab *)
+(*let () = List.iter (fun x -> Printf.printf "%s " x) ( rest |> List.rev )  *)
+(*let () = List.iter (fun x -> Printf.printf "%c " ( ( Huff_tree.get_byte_in_huff_tree_tab huff_tab x ) |> Char.chr )) ( rest |> List.rev )  *)

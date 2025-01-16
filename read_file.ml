@@ -6,10 +6,23 @@ let read_file_in_bytes_for_compression fname =
         try 
             let byte = ( Bs.read_byte i_str ) in
             (*Printf.printf "textim: %d | " (byte);*)
-            (*Printf.printf "textim: %c\n" (( byte ) |> Char.chr );*)
+            Printf.printf "textim: %c\n" (( byte ) |> Char.chr );
             loop i_str (byte :: acc)
         with 
-        | _ -> 
+        | End_of_file -> 
+                print_endline "end of file";
+            close_in in_ch;
+            acc
+        | Bs.End_of_stream -> 
+                print_endline "end of file";
+            close_in in_ch;
+            acc
+        | ex ->  (* General catch-all for unexpected exceptions *)
+            Printf.printf "Error: %s\n" (Printexc.to_string ex);
+            close_in in_ch;
+            acc
+        | _ ->
+                print_endline "other error";
             close_in in_ch;
             acc
     in
@@ -56,10 +69,7 @@ let read_file_for_decompress fname =
     let in_ch = open_in fname in
     let istr = Bs.of_in_channel in_ch in
     let tab_size = Bs.read_byte istr in
-    Printf.printf "tabsize: %d\n" tab_size;
 
-
-    print_endline "here 1";
     let rec read_table_keys acc counter = 
         if counter = tab_size then acc
         else 
@@ -91,11 +101,13 @@ let read_file_for_decompress fname =
     in
     let temp_table = merge_keys_values temp_table_keys temp_table_values [] in
     let table = temp_table |> Huff_tree.huff_tree_with_arr_to_huff_tree_with_str in  
-
-    print_endline "here 2";
+    
+    let () = List.iter (fun x -> Printf.printf "%c - %s\n" (x |> fst |> Char.chr) (x |> snd)) table in 
+    let _ = Bs.read_bit istr in
     let rec read_tab_of_compr_bits acc_res acc_bit=
         try 
             let bit = Bs.read_bit istr in
+            Printf.printf "%d" bit;
             let new_acc_bit = bit :: acc_bit in
 
             let bits_tab = new_acc_bit |> List.rev in
@@ -103,14 +115,15 @@ let read_file_for_decompress fname =
             let is_in_tab = Huff_tree.is_compr_byte_in_tree_tab bits_str table in
             match is_in_tab with
             | false -> read_tab_of_compr_bits acc_res new_acc_bit
-            | true -> read_tab_of_compr_bits (bits_str :: acc_res) []
+            | true -> 
+                    (*Printf.printf "(%s); " bits_str;*)
+                    read_tab_of_compr_bits (bits_str :: acc_res) []
 
         with 
         | _ -> acc_res |> List.rev
     in
+    print_endline "exatcly our data:";
     let res = read_tab_of_compr_bits [] [] in
-    print_endline "so we exit this func?";
     close_in in_ch;
-    print_endline "so we exit this func?";
     ( table, res )
     
