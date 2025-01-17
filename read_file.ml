@@ -1,38 +1,20 @@
 
-let read_file_in_bytes_for_compression fname = 
+let read_for_compression fname = 
     let ic = open_in fname in
-    let buf = Buffer.create 1024 in
     let rec loop acc =
         try
             let byte = input_byte ic in
-            Printf.printf "rb: %d | %c\n" byte (byte |> Char.chr);
-            (*Buffer.add_char buf (Char.chr byte);*)
             loop (byte :: acc)
-      (*loop ()*)
         with End_of_file ->
             close_in ic;
-      (*Buffer.contents buf*)
-      acc
-            in
-  loop [] 
-
-let read_file_in_short_for_decompression fname = 
-    let in_ch = open_in fname in
-    let istr = Bs.of_in_channel in_ch in
-    let rec loop i_str acc =
-        try 
-            let byte = ( Bs.read_n_bits i_str 32 ) in
-            (*Printf.printf "textim: %d | " (byte);*)
-            (*Printf.printf "textim: %c\n" (( byte ) |> Char.chr );*)
-            loop i_str (byte :: acc)
-        with 
-        | _ -> 
-            close_in in_ch;
             acc
     in
-    (loop istr []) |> List.rev
+    loop [] 
 
-let rec read_bits_compressed istr acc main_bit = 
+
+let read_for_decompression fname = 
+    let rec read_bits_compressed istr acc main_bit = 
+        (*read bits (0s and 1s) till it finds a change of the bit (i.e if there was 11110 it stops when it encounters 0) *)
         let bit = Bs.read_bit istr in
         match main_bit with
         | None -> read_bits_compressed istr (bit :: acc) (Some bit)
@@ -42,18 +24,20 @@ let rec read_bits_compressed istr acc main_bit =
             else 
                 (bit :: acc) |> List.rev
         end
+    in
 
-let rec read_first_bits_compressed istr acc = 
-    match ( read_bits_compressed istr acc (Some 1) ) |> List.rev with
+    let rec read_first_bits_compressed istr acc = 
+        match ( read_bits_compressed istr acc (Some 1) ) |> List.rev with
     | [] -> [1]
     | h :: t -> t
+    in
 
-let rec read_second_bits_compressed istr acc = 
-    match ( read_bits_compressed istr acc (Some 0) ) |> List.rev with
+    let rec read_second_bits_compressed istr acc = 
+        match ( read_bits_compressed istr acc (Some 0) ) |> List.rev with
     | [] -> [0]
     | h :: t -> t
+    in
 
-let read_file_for_decompress fname = 
     let in_ch = open_in fname in
     let istr = Bs.of_in_channel in_ch in
     let tab_size = Bs.read_byte istr in
@@ -90,12 +74,10 @@ let read_file_for_decompress fname =
     let temp_table = merge_keys_values temp_table_keys temp_table_values [] in
     let table = temp_table |> Huff_tree.huff_tree_with_arr_to_huff_tree_with_str in  
     
-    let () = List.iter (fun x -> Printf.printf "%c - %s\n" (x |> fst |> Char.chr) (x |> snd)) table in 
     let _ = Bs.read_bit istr in
     let rec read_tab_of_compr_bits acc_res acc_bit=
         try 
             let bit = Bs.read_bit istr in
-            Printf.printf "%d" bit;
             let new_acc_bit = bit :: acc_bit in
 
             let bits_tab = new_acc_bit |> List.rev in
@@ -104,13 +86,11 @@ let read_file_for_decompress fname =
             match is_in_tab with
             | false -> read_tab_of_compr_bits acc_res new_acc_bit
             | true -> 
-                    Printf.printf "(%s); " bits_str;
                     read_tab_of_compr_bits (bits_str :: acc_res) []
 
         with 
         | _ -> acc_res |> List.rev
     in
-    print_endline "exatcly our data:";
     let res = read_tab_of_compr_bits [] [] in
     close_in in_ch;
     ( table, res )

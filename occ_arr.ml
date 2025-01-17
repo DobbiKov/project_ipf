@@ -1,5 +1,18 @@
 
 (* utilities *)
+let int_to_bits n =
+  (* Converts an integer (0-255) to an array of 8 bits *)
+  if n < 0 || n > 255 then
+    invalid_arg "Input must be in the range 0-255"
+  else
+    let rec to_bits n count acc =
+      if count = 0 then acc
+      else
+        let bit = n land 1 in
+        to_bits (n lsr 1) (count - 1) (bit :: acc)
+    in
+    to_bits n 8 []
+
 let rec pow a = function
   | 0 -> 1
   | 1 -> a
@@ -22,7 +35,7 @@ let find_min_in_sorted = function
 (* other part *)
 
 let count_occs in_arr = 
-
+    (* returns an array of format [( byte(char), int(frequency) ), ...]*)
     let rec count_for_one_byte arr l acc =
         match arr with
         | [] -> begin 
@@ -42,13 +55,14 @@ let count_occs in_arr =
     in
     List.fold_left f [] in_arr 
 
-let sort_count_occs l =
-    let comp el1 el2 =
-        compare (snd el1) (snd el2)
-    in
-    List.sort comp l
 
 let construct_occs_table in_arr = 
+    let sort_count_occs l =
+        let comp el1 el2 =
+            compare (snd el1) (snd el2)
+        in
+        List.sort comp l
+    in
     in_arr |> count_occs |> sort_count_occs
 
 let print_occ_list l =
