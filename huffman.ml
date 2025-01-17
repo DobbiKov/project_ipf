@@ -6,4 +6,5 @@ let decompress file_name =
 let compress file_name = 
     let bytes = file_name |> Read_file.read_file_in_bytes_for_compression in
     let huff_tree_a = file_name |> Read_file.read_file_in_bytes_for_compression |> Occ_arr.construct_occs_table |> Huff_tree.construct_huff_tree |> Huff_tree.tree_to_arr_2 in
-    Write_file.write_compressed_file ( file_name ^ ".hf" ) huff_tree_a bytes
+    Write_file.write_compressed_file ( file_name ^ ".hf" ) huff_tree_a bytes;
+    ()

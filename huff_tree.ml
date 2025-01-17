@@ -132,7 +132,8 @@ let process_huff_tree_tab huff_tree =
     let vals, comp_bits = separate_lists h_t_2 s_vals (s_comp_bits @ [1]) in
     List.iter (Printf.printf "%d") vals;
     List.iter (Printf.printf "%d") comp_bits;
-    vals @ comp_bits
+    let last_bit = match ( comp_bits |> List.rev ) with [] -> 0 | h :: t -> if h = 0 then 1 else 0 in
+    vals @ ( comp_bits @ [last_bit] )
 
 let rec is_compr_byte_in_tree_tab bits_str huff_tab = 
     match huff_tab with
@@ -180,9 +181,10 @@ let compressed_bytes_to_bytes huff_tree_tab bytes_tab =
         | [] -> acc
         | h :: t -> 
                 let byte = get_byte_in_huff_tree_tab huff_tree_tab h in 
+                Printf.printf "decomp: %d | %c | %s\n" byte (byte |> Char.chr) h;
                 loop (byte :: acc) t 
     in
-    loop [] bytes_tab
+    ( loop [] bytes_tab ) |> List.rev
 
 let compressed_file_bytes_to_huff_tree_arr compr_bytes =
     let tab_len, rest = match compr_bytes with

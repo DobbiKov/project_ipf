@@ -26,7 +26,9 @@ let write_compressed_file fname huff_table file_bytes =
 
     tab_len |> int_to_bits |> write_bits_tab;
 
+    let count = ref 0 in
     let huff_arr_to_write = Huff_tree.process_huff_tree_tab huff_table in   
+    count := !count + ( huff_arr_to_write |> List.length );
     write_bits_tab huff_arr_to_write;
     (*print_endline "writing keys";*)
     (*write_tab_keys_aux huff_table;*)
@@ -40,12 +42,13 @@ let write_compressed_file fname huff_table file_bytes =
     (*print_endline "bytes to compressed end";*)
     let rec write_comp_bytes = function
         | [] -> ()
-        | h :: t -> write_bits_tab h; print_endline ""; write_comp_bytes t;
+        | h :: t -> write_bits_tab h; count := !count + (h |> List.length); print_endline ""; write_comp_bytes t;
     in
     print_endline "exactly our data:";
     write_comp_bytes compressed_bytes;
     Bs.finalize o_str;
-    close_out och
+    close_out och;
+    !count
 
 let write_decompressed_file fname huff_table file_bytes = 
     let och = open_out fname in
@@ -55,7 +58,10 @@ let write_decompressed_file fname huff_table file_bytes =
     let decompressed_bytes = Huff_tree.compressed_bytes_to_bytes huff_table file_bytes in
     let rec write_comp_bytes = function
         | [] -> ()
-        | h :: t -> Bs.write_byte o_str h; write_comp_bytes t;
+        | h :: t -> 
+                output_byte och h;
+                (*Bs.write_byte o_str h; *)
+                write_comp_bytes t;
     in
     write_comp_bytes decompressed_bytes;
     (*Bs.finalize o_str;*)

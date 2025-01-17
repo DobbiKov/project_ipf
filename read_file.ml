@@ -1,32 +1,20 @@
 
 let read_file_in_bytes_for_compression fname = 
-    let in_ch = open_in fname in
-    let istr = Bs.of_in_channel in_ch in
-    let rec loop i_str acc =
-        try 
-            let byte = ( Bs.read_byte i_str ) in
-            (*Printf.printf "textim: %d | " (byte);*)
-            Printf.printf "textim: %c\n" (( byte ) |> Char.chr );
-            loop i_str (byte :: acc)
-        with 
-        | End_of_file -> 
-                print_endline "end of file";
-            close_in in_ch;
-            acc
-        | Bs.End_of_stream -> 
-                print_endline "end of file";
-            close_in in_ch;
-            acc
-        | ex ->  (* General catch-all for unexpected exceptions *)
-            Printf.printf "Error: %s\n" (Printexc.to_string ex);
-            close_in in_ch;
-            acc
-        | _ ->
-                print_endline "other error";
-            close_in in_ch;
-            acc
-    in
-    (loop istr []) |> List.rev
+    let ic = open_in fname in
+    let buf = Buffer.create 1024 in
+    let rec loop acc =
+        try
+            let byte = input_byte ic in
+            Printf.printf "rb: %d | %c\n" byte (byte |> Char.chr);
+            (*Buffer.add_char buf (Char.chr byte);*)
+            loop (byte :: acc)
+      (*loop ()*)
+        with End_of_file ->
+            close_in ic;
+      (*Buffer.contents buf*)
+      acc
+            in
+  loop [] 
 
 let read_file_in_short_for_decompression fname = 
     let in_ch = open_in fname in
@@ -116,7 +104,7 @@ let read_file_for_decompress fname =
             match is_in_tab with
             | false -> read_tab_of_compr_bits acc_res new_acc_bit
             | true -> 
-                    (*Printf.printf "(%s); " bits_str;*)
+                    Printf.printf "(%s); " bits_str;
                     read_tab_of_compr_bits (bits_str :: acc_res) []
 
         with 
