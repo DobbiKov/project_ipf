@@ -29,11 +29,18 @@ let handle_stats fname =
         Printf.printf "Taille d'un fichier %s (avant compression): %d bytes\n" fname len_before;
         Printf.printf "Taille d'un fichier %s (apres compression): %d bytes\n" ( fname ^ ".hf" ) len_after 
 
+let help_handler () =
+    print_endline "man de huff cli:
+— huff --help : affiche ce message d’aide sur les différentes options
+— huff <fichier> : compresse le fichier donné en argument pour produire un fichier fichier.hf
+— huff <fichier.hf> : décompresser le fichier donné en argument pour produire un fichier fichier
+— huff --stats <fichier> : compresse le fichier et affiche aussi des statistiques sur ce dernier"
+
 let main_handler args =
     if Array.length args < 2 then
         print_endline "Try: huff --help"
     else match args.(1) with
-    | "--help" -> print_endline "help"
+    | "--help" -> help_handler ()
     | "--stats" -> 
             if args |> Array.length < 3 then 
                 print_endline "Try: huff --help"
