@@ -18,6 +18,11 @@ let handle_file_name fname =
     | true -> handle_decompress_file fname
     | false -> handle_compress_file fname
 
+let calc_effic taille_bef taille_aft =
+    let new_taille = taille_bef - taille_aft in
+    let eff = (new_taille |> float_of_int) /. (taille_bef |> float_of_int) in
+    eff
+
 let handle_stats fname =
     if check_file_exists fname = false then
         failwith "The file doesn't exists"
@@ -27,7 +32,11 @@ let handle_stats fname =
         let len_after = Huffman.stats ( fname ^ ".hf" ) in
         print_endline "Statistique de la compression:";
         Printf.printf "Taille d'un fichier %s (avant compression): %d bytes\n" fname len_before;
-        Printf.printf "Taille d'un fichier %s (apres compression): %d bytes\n" ( fname ^ ".hf" ) len_after 
+        Printf.printf "Taille d'un fichier %s (apres compression): %d bytes\n" ( fname ^ ".hf" ) len_after;
+
+        match calc_effic len_before len_after with
+        | n when n <= 0. -> Printf.printf "Éspace perdu: %d%%\n" ( (n *. 100.) |> int_of_float )
+        | n -> Printf.printf "Éspace économisé: %d%%\n" (( n *. 100.) |> int_of_float )
 
 let help_handler () =
     print_endline "man de huff cli:

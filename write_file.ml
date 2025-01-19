@@ -17,7 +17,7 @@ let write_compressed_file fname huff_table file_bytes =
     let compressed_bytes = Huff_tree.bytes_to_compressed_bytes huff_table file_bytes in
     let rec write_comp_bytes = function
         | [] -> ()
-        | h :: t -> write_bits_tab h; print_endline ""; write_comp_bytes t;
+        | h :: t -> write_bits_tab h; write_comp_bytes t;
     in
 
     write_comp_bytes compressed_bytes;
