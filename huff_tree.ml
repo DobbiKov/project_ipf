@@ -149,10 +149,8 @@ let rec get_byte_in_huff_tree_tab huff_tree_tab value =
             if (snd h) = value then fst h
             else get_byte_in_huff_tree_tab t value
 
-let rec print_bit_tab = function 
-    | [] -> ()
-    | h :: t -> Printf.printf "%d" h; print_bit_tab t
-
+let rec print_bit_tab arr = 
+    List.iter (Printf.printf "%d") arr
 let bytes_to_compressed_bytes huff_tree_tab bytes_tab = 
     let rec loop acc bt = 
         match bt with
