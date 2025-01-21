@@ -9,6 +9,6 @@ The project's goal is to write a CLI tool to compress and decompress files using
 
 ## Setup
 1. Make sure you have __ocaml__ and __dune__ installed on your machine
-2. Clone the project `git clone https://github.com/DobbiKov/project_ipf`
-3. Enter into the folder `cd project_ipf`
+2. Clone the project `git clone https://github.com/ykorote/projet_ocaml`
+3. Enter into the folder `cd projet_ocaml`
 4. Execute the file, for example to see the help, write: `dune exec ./huff.exe --help`

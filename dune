@@ -1,3 +1,3 @@
-(executable
- (name main)
- (promote (until-clean)))
+(executables
+ (names unit_test main)
+ (modules occ_arr huff_tree read_file unit_test main))
