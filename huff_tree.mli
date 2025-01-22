@@ -41,6 +41,7 @@ val get_byte_in_huff_tree_tab: (int * 'a) list -> 'a -> int
 val bytes_to_compressed_bytes: (int * int list) list -> int list -> int list list
 (**
     [bytes_to_compressed_bytes huff_tree_tab bytes_tab] takes array of huff_tree and array of bytes (chars) and returns same array with compressed bytes (i.e in 1110, 0001 form)
+    however the result is in reversed order
      *)
 
 val compressed_bytes_to_bytes: (int * 'a) list -> 'a list -> int list

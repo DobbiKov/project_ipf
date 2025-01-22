@@ -36,17 +36,18 @@ let find_min_in_sorted = function
 
 let count_occs in_arr = 
     (* returns an array of format [( byte(char), int(frequency) ), ...]*)
-    let rec count_for_one_byte arr l acc =
-        match arr with
-        | [] -> begin 
-            match acc with
-            | [] -> [(l, 1)]
-            | h :: t -> (l, 1) :: acc
+    let rec count_for_one_byte acc elem acc2 =
+        (*counts a number of occurencies of the element [elem] in the [acc]*)
+        match acc with
+        | [] -> begin (*if acc is empty, then we iterated over all the elements and didn't find [elem]*)
+            match acc2 with
+            | [] -> [(elem, 1)] (*if acc2 is also empty, then we only start iterating the list using fold_left*)
+            | h :: t -> (elem, 1) :: acc2 (*if acc2 is not empty, then we haven't analyzed [elem] yet, thus we add it to acc2 and return it*)
         end
-        | h :: t -> (
-            if (fst h) == l then
-                 ((l, (snd h) + 1) :: acc) @ t
-            else count_for_one_byte t l (h :: acc)
+        | h :: t -> ( (*acc not empty, then we are iterating list that looks like [(char, frequency)]*)
+            if (fst h) = elem then (*if we find an element (char, frequence) such that char == elem, then we return add 1 to frequency (cause +1 elem) and return all the acc*)
+                 ((elem, (snd h) + 1) :: acc2) @ t
+            else count_for_one_byte t elem (h :: acc2) (*if we haven't found it yet, we iterate further the list and adding the element h to the temp acc*)
         )
     in
 
@@ -57,6 +58,7 @@ let count_occs in_arr =
 
 
 let construct_occs_table in_arr = 
+    (*making table of frequencies and sorting it by frequency of each char*)
     let sort_count_occs l =
         let comp el1 el2 =
             compare (snd el1) (snd el2)

@@ -11,13 +11,13 @@ let construct_huff_tree l =
     let rec construct left right acc = 
         match left, right with
         | (_, Nil), _ -> begin (*if left subtree is not initialized yet*)
-            if Occ_arr.is_empty acc then 
+            if Occ_arr.is_empty acc then (*if acc is empty, there's nothing to construct the tree from,*)
                Nil 
-            else if Occ_arr.is_singleton acc then
+            else if Occ_arr.is_singleton acc then (*if acc contains only one element, also no need to continue, we return only one element*)
                 Node (Leaf (acc |> Occ_arr.find_min_in_sorted |> fst),  Nil)
             else begin 
                 match acc with
-                | h1 :: h2 :: t -> (
+                | h1 :: h2 :: t -> ( (*in the other case, we create a subtree of two leafs and pass it further*)
                     let new_left_node = Node (Leaf (fst h1), Leaf (fst h2)) in
                     let new_left = ((snd h1) + (snd h2), new_left_node) in
                     construct new_left right t
@@ -26,7 +26,7 @@ let construct_huff_tree l =
             end
                 
         end
-        | _, (_, Nil) -> begin (*if right subtree is not initialized yet*)
+        | _, (_, Nil) -> begin (*if right subtree is not initialized yet*) (*same logic applies here as for left*)
             if Occ_arr.is_empty acc then 
                Node (snd left, Nil) 
             else if Occ_arr.is_singleton acc then
@@ -43,9 +43,9 @@ let construct_huff_tree l =
         end
         | _, _ -> begin (*if both subtrees are initialized*)
             match acc with
-            | [] -> Node (snd left, snd right)
+            | [] -> Node (snd left, snd right) (*if acc is empty, then we used all the elements to construct the tree, return it*)
             | h :: t -> 
-                if (fst left) <= (fst right) then (*if left is less frequents the the right one, we will place new node to the left*)
+                if (fst left) <= (fst right) then (*if left has less frequency than the right one, we will place new node to the left*)
                     let new_left_node = Node (snd left, Leaf (fst h)) in
                     let new_left = ((fst left) + (snd h), new_left_node) in
                     construct new_left right t
@@ -58,29 +58,13 @@ let construct_huff_tree l =
 
     construct (0, Nil) (0, Nil) l
 
-let tree_to_arr tr = 
-    let rec loop tr' integer count =
-        match tr' with
-        | Nil -> []
-        | Leaf x -> [ (x, integer * (pow 2 (32 - count))) ]
-        | Node (x, y) -> 
-                (loop x (integer * 2) (count + 1)) @ (loop y ((integer * 2) + 1) (count + 1))
-    in
-    let temp_res = loop tr 0 0 in
-
-    let comp el1 el2 =
-        compare (el1 |> snd) (el2 |> snd)
-    in
-
-    ( List.sort comp temp_res ) |> List.rev
-
 let tree_to_arr_2 tr = 
     (*takes huff tree and returns an array of (key, value) where key is byte (char) and value is in bit format (11110, 00001)*)
     let rec loop tr' arr count =
         match tr' with
         | Nil -> []
         | Leaf x -> [ (x, arr |> List.rev) ]
-        | Node (x, y) -> 
+        | Node (x, y) -> (*left subtree gives 0, right one gives 1*)
                 (loop x (0 :: arr) (count + 1)) @ (loop y (1 :: arr) (count + 1))
     in
     let temp_res = loop tr [] 0 in
@@ -90,6 +74,8 @@ let tree_to_arr_2 tr =
     in
 
     let res = ( List.sort comp temp_res ) in
+    (*we exclude first and last elements that are 11111 and 00000 respectively to put them first during compression*)
+    (*as it will facilitate the read of decompression table*)
     let last, without_last  = match res with
     | [] -> ((0, []), [])
     | h :: t -> (h, t |> List.rev) 
@@ -104,7 +90,9 @@ let tree_to_arr_2 tr =
 
 
 let process_huff_tree_tab huff_tree = 
-    (* takes an array of huff tree and converts it to the list where the keys are first, then values in the second. Each key and value is converted to bit format. The result is an array of bits *)
+    (* takes an array of huff tree and converts it to the list where the keys are first, then values in the second. 
+       Each key and value is converted to bit format. The result is an array of bits *)
+    (*example: it takes [(65, [110]), (68, [001])], it will give: [1000001 1000100 110 001] where 1000001 is 65 in binary, 1000100 is 68 in binary*)
     let rec sep_first_elem h_t acc1 acc2 = 
         match h_t with
         | [] -> [], [], []
@@ -120,12 +108,14 @@ let process_huff_tree_tab huff_tree =
 (*here we add 0 in the end of first value, and 1 in the end of the second value, so we obtain 1111110 00000001*)
 (* we need it so we could read properly our table during the decompression *)
 
-    let h_t_1, f_vals, f_comp_bits = sep_first_elem huff_tree [] [] in
-    let h_t_2, s_vals, s_comp_bits = sep_first_elem h_t_1 f_vals (f_comp_bits @ [0]) in
-    let vals, comp_bits = separate_lists h_t_2 s_vals (s_comp_bits @ [1]) in
+    let h_t_1, f_bytes, f_comp_bits = sep_first_elem huff_tree [] [] in (*h_t_ stnads for tale (rest of the list)*)
+    let h_t_2, s_bytes, s_comp_bits = sep_first_elem h_t_1 f_bytes (f_comp_bits @ [0]) in 
+    let bytes, comp_bits = separate_lists h_t_2 s_bytes (s_comp_bits @ [1]) in
 
     let last_bit = match ( comp_bits |> List.rev ) with [] -> 0 | h :: t -> if h = 0 then 1 else 0 in
-    vals @ ( comp_bits @ [last_bit] )
+    (*we add in the bit called last bit and it must be complement of the true last bit that was in the list*)
+    (*the idea behind that is this approach make easier the decompression*)
+    bytes @ ( comp_bits @ [last_bit] )
 
 let rec is_compr_byte_in_tree_tab bits_str huff_tab = 
     match huff_tab with
