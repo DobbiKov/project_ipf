@@ -9,7 +9,7 @@ let write_compressed_file fname huff_table file_bytes =
       | [] -> ()
       | h :: t -> 
 
-              Bs.write_bit o_str h; write_bits_tab t
+              Bs.write_bit o_str h; Printf.printf "%d" h; write_bits_tab t
   in 
 
   tab_len |> Occ_arr.int_to_bits |> write_bits_tab;
@@ -24,4 +24,18 @@ let write_compressed_file fname huff_table file_bytes =
 
   write_comp_bytes compressed_bytes;
   Bs.finalize o_str;
+  close_out och
+
+let write_decompressed_file fname huff_table file_bytes = 
+  let och = open_out fname in
+  (*let o_str = Bs.of_out_channel och in*)
+  let decompressed_bytes = Huff_tree.compressed_bytes_to_bytes huff_table file_bytes in
+  let rec write_comp_bytes = function
+      | [] -> ()
+      | h :: t -> 
+              output_byte och h;
+              write_comp_bytes t;
+  in
+  write_comp_bytes decompressed_bytes;
+  (*Bs.finalize o_str;*)
   close_out och

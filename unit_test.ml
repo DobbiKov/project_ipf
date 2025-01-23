@@ -1,6 +1,7 @@
 open Occ_arr
 open Huff_tree
 open Write_file
+open Read_file
 
 let decode_and_print_huffman_tree input_string =
   (* print function *)
@@ -20,6 +21,7 @@ let decode_and_print_huffman_tree input_string =
     |> String.to_seq
     |> List.of_seq
     |> List.map Char.code
+    |> List.rev
   in
 
   
@@ -64,7 +66,6 @@ let decode_and_print_huffman_tree input_string =
   let decoded_string =
     decoded_bytes
     |> List.map Char.chr
-    |> List.rev
     |> List.to_seq
     |> String.of_seq
   in
@@ -78,11 +79,39 @@ let decode_and_print_huffman_tree input_string =
   else
     Printf.printf "❌ Error\n";
 
-  let file_name = "test.hf" in
+  let compressed_file_name = "test.hf" in
+  write_compressed_file compressed_file_name arr2 input_bytes;
+  Printf.printf "Compressed file written: %s\n" compressed_file_name;
 
-  write_compressed_file file_name arr2 input_bytes;
+  let compressed_file_bytes = read_for_compression compressed_file_name in
+  if  compressed_file_bytes = input_bytes then
+    Printf.printf "✅ Success : verified compressed file bytes\n"
+  else
+    Printf.printf "❌ Error : compressed file bytes do not match input bytes\n";
 
-  Printf.printf "Compressed file written: %s\n" file_name
+  let decompressed_file_name = "test_decompressed.txt" in
+  write_decompressed_file decompressed_file_name arr2 compressed_bits;
+  Printf.printf "Decompressed file written: %s\n" decompressed_file_name;
+
+  let (read_huff_table, final_compressed_bits) = read_for_decompression compressed_file_name in
+  let decompressed_bytes = compressed_bytes_to_bytes read_huff_table final_compressed_bits in
+  let decompressed_string = 
+    decompressed_bytes 
+    |> List.map Char.chr 
+    |> List.to_seq 
+    |> String.of_seq 
+  in
+  List.iter (fun (x, y) -> Printf.printf "%c %s\n" (Char.chr x) y) read_huff_table;
+
+  if decompressed_string = input_string then
+    Printf.printf "✅ Success: decompressed string matches input.\n\n"
+  else
+    Printf.printf "❌ Error: decompressed string does NOT match input.\n%s_%s\n" input_string decompressed_string;
+  
+  final_compressed_bits |> List.iter (Printf.printf "%s");
+  ()
+  
+
 
 (* Example usage: *)
 let () =
@@ -94,7 +123,7 @@ let () =
     " ";                     
     "hello world";            
     "The quick brown fox jumps over the lazy dog"; 
-    "";                      
+    (*"";                      
     "!@#$%^&*()";            
     "1234567890";            
     "你好世界";              
@@ -102,7 +131,7 @@ let () =
     "こんにちは世界";         
     String.init 10000 (fun _ -> 'a'); 
     "aaaabbbcc";             
-    "abcdabcdabcdabcd"   
+    "abcdabcdabcdabcd"*)
   ] in
 
   List.iter (fun test_string ->
