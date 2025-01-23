@@ -1,3 +1,4 @@
+type 'a occ_table = ('a * int) list
 
 (* utilities *)
 let int_to_bits n =

@@ -5,6 +5,9 @@ type tree =
     | Node of tree * tree
     | Nil
 
+type byte_arr = int list 
+type compressed_byte = int list
+type 'a huff_tree_arr = (int * 'a) list
 
 let construct_huff_tree l =
 

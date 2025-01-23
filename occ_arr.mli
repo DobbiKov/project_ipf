@@ -1,16 +1,18 @@
-val count_occs: 'a list -> ('a * int) list
+type 'a occ_table = ('a * int) list
+
+val count_occs: 'a list -> 'a occ_table
     (**
     [count_occs in_arr] takes an array of bytes (that represent chars) 
 and returns an array if form [(byte, frequency), ] of frequency of each char
      *)
 
-val construct_occs_table: 'a list -> ('a * int) list
+val construct_occs_table: 'a list -> 'a occ_table
 (**
     [construct_occs_table in_arr] takes an array of bytes, construct an array of frequencies and sorts it
     returns an array of form [(char, int(frequency)), ]
         *)
 
-val print_occ_list: (int * int) list -> unit
+val print_occ_list: int occ_table -> unit
     (**
     [print_occ_list l] takes a frequency table an prints it
     *)
