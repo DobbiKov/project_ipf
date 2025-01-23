@@ -1,5 +1,6 @@
 open Occ_arr
 open Huff_tree
+open Write_file
 
 let decode_and_print_huffman_tree input_string =
   (* print function *)
@@ -75,7 +76,13 @@ let decode_and_print_huffman_tree input_string =
   if decoded_string = input_string then
     Printf.printf "✅ Success\n"
   else
-    Printf.printf "❌ Error\n"
+    Printf.printf "❌ Error\n";
+
+  let file_name = "test.hf" in
+
+  write_compressed_file file_name arr2 input_bytes;
+
+  Printf.printf "Compressed file written: %s\n" file_name
 
 (* Example usage: *)
 let () =
@@ -95,11 +102,11 @@ let () =
     "こんにちは世界";         
     String.init 10000 (fun _ -> 'a'); 
     "aaaabbbcc";             
-    "abcdabcdabcdabcd"       
+    "abcdabcdabcdabcd"   
   ] in
 
   List.iter (fun test_string ->
     Printf.printf "Testing string: %s\n" test_string;
     let _ = decode_and_print_huffman_tree test_string in
-    Printf.printf "====================\n\n";
-  ) test_strings;
+    Printf.printf "====================\n\n"
+  ) test_strings

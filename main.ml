@@ -20,3 +20,5 @@ let rec print_arr_of_bits arr =
 
 let huff_tree_a = file_name |> Read_file.read_for_compression |> Occ_arr.construct_occs_table |> Huff_tree.construct_huff_tree |> Huff_tree.tree_to_arr_2
 let () = List.iter (fun x -> Printf.printf "%c - %s\n" (x |> fst |> Char.chr) (( snd x ) |> Huff_tree.bit_tab_to_str)) huff_tree_a
+
+
