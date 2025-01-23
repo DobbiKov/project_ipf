@@ -9,7 +9,8 @@ let write_compressed_file fname huff_table file_bytes =
       | [] -> ()
       | h :: t -> 
 
-              Bs.write_bit o_str h; Printf.printf "%d" h; write_bits_tab t
+              Bs.write_bit o_str h; 
+              write_bits_tab t
   in 
 
   tab_len |> Occ_arr.int_to_bits |> write_bits_tab;

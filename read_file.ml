@@ -76,7 +76,6 @@ let read_for_decompression fname =
     let rec read_tab_of_compr_bits acc_res acc_bit=
         try 
             let bit = Bs.read_bit istr in
-            Printf.printf "%d" bit;
             let new_acc_bit = bit :: acc_bit in
 
             let bits_tab = new_acc_bit |> List.rev in

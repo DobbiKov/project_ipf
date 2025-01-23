@@ -83,12 +83,6 @@ let decode_and_print_huffman_tree input_string =
   write_compressed_file compressed_file_name arr2 input_bytes;
   Printf.printf "Compressed file written: %s\n" compressed_file_name;
 
-  let compressed_file_bytes = read_for_compression compressed_file_name in
-  if  compressed_file_bytes = input_bytes then
-    Printf.printf "✅ Success : verified compressed file bytes\n"
-  else
-    Printf.printf "❌ Error : compressed file bytes do not match input bytes\n";
-
   let decompressed_file_name = "test_decompressed.txt" in
   write_decompressed_file decompressed_file_name arr2 compressed_bits;
   Printf.printf "Decompressed file written: %s\n" decompressed_file_name;
@@ -101,14 +95,19 @@ let decode_and_print_huffman_tree input_string =
     |> List.to_seq 
     |> String.of_seq 
   in
-  List.iter (fun (x, y) -> Printf.printf "%c %s\n" (Char.chr x) y) read_huff_table;
+
+  Printf.printf "=== Input Bytes ===\n";
+  List.iter (fun byte -> Printf.printf "%d " byte) input_bytes;
+  Printf.printf "\n\n";
+  Printf.printf "=== Decompressed Bytes ===\n";
+  List.iter (fun byte -> Printf.printf "%d " byte) decompressed_bytes;
+  List.iter (Printf.printf "%s") final_compressed_bits;
+  Printf.printf "\n\n";
 
   if decompressed_string = input_string then
     Printf.printf "✅ Success: decompressed string matches input.\n\n"
   else
     Printf.printf "❌ Error: decompressed string does NOT match input.\n%s_%s\n" input_string decompressed_string;
-  
-  final_compressed_bits |> List.iter (Printf.printf "%s");
   ()
   
 
@@ -116,14 +115,13 @@ let decode_and_print_huffman_tree input_string =
 (* Example usage: *)
 let () =
   let test_strings = [
-    "aaaaaa";                 
-    "ababababab";
+    "aaaaaa";               
     "abcabcabc";
     "a";                     
     " ";                     
     "hello world";            
     "The quick brown fox jumps over the lazy dog"; 
-    (*"";                      
+    "";                      
     "!@#$%^&*()";            
     "1234567890";            
     "你好世界";              
@@ -131,7 +129,7 @@ let () =
     "こんにちは世界";         
     String.init 10000 (fun _ -> 'a'); 
     "aaaabbbcc";             
-    "abcdabcdabcdabcd"*)
+    "abcdabcdabcdabcd"
   ] in
 
   List.iter (fun test_string ->

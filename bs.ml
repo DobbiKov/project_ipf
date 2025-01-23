@@ -39,9 +39,7 @@ let read_bit (is : istream) =
         try
           let b2 = input_byte is.channel in
           is.buffer <- is.buffer lor (b2 lsl 16)
-        with End_of_file -> 
-            is.len <- 16;
-            if is.buffer = 0 then raise End_of_stream
+        with End_of_file -> is.len <- 16
       in
       res
     end
