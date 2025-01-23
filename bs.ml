@@ -39,7 +39,9 @@ let read_bit (is : istream) =
         try
           let b2 = input_byte is.channel in
           is.buffer <- is.buffer lor (b2 lsl 16)
-        with End_of_file -> is.len <- 16
+        with End_of_file -> 
+            is.len <- 16;
+            if is.buffer = 0 then raise End_of_stream
       in
       res
     end
@@ -55,7 +57,7 @@ let read_bit (is : istream) =
 
 let read_n_bits (is : istream) n =
   let rec loop i acc =
-    if i < n then loop (i + 1) (acc lor (read_bit is lsl i)) else acc
+    if i < n then loop (i + 1) ((acc lsl 1) lor (read_bit is)) else acc
   in
   if n < 0 || n > Sys.int_size then
     raise (Invalid_argument (Format.sprintf "read_n_bits _ %d" n))
@@ -89,15 +91,15 @@ let finalize (oc : ostream) =
 
 
 let write_n_bits (os : ostream) n b =
-  let rec loop i b =
+  let rec loop i =
     if i < n then begin
-      write_bit os (b land 1);
-      loop (i+1) (b lsr 1)
+      write_bit os ((b lsr (n-1-i)) land 1);
+      loop (i+1)
     end
   in
   if n < 0 || n > Sys.int_size then
     raise (Invalid_argument (Format.sprintf "write_n_bits _ %d" n))
-  else loop 0 b
+  else loop 0
 
 let write_byte os b = write_n_bits os 8 b
 let write_short os b = write_n_bits os 16 b
