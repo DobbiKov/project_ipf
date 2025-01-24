@@ -1,7 +1,7 @@
 type 'a t 
 
-(** The type of heaps. Elements are ordered using generic comparison.
-*)
+(** The type of heaps. Elements are ordered using generic comparison. 
+    Stores the number of elements*)
 
 val empty : 'a t
 (** [empty] is the empty heap. *)
@@ -22,3 +22,6 @@ val is_singleton : 'a t -> bool
 
 val is_empty : 'a t -> bool
 (** [is_empty h] returns [true] if [h] contains zero element *)
+
+val min_heapify : 'a t -> 'a t
+(** [min_heapify h] ensures that [h] satisfies the min-heap property. *)
