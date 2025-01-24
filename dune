@@ -1,3 +1,3 @@
 (executables
- (names unit_test main)
- (modules bs occ_arr huff_tree read_file write_file unit_test main))
+ (names unit_test main huff)
+ (modules bs occ_arr huff_tree read_file write_file huffman huff unit_test main))
