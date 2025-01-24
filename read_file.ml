@@ -27,13 +27,13 @@ let read_for_decompression fname =
     let rec read_first_bits_compressed istr acc = 
         match ( read_bits_compressed istr acc (Some 1) ) |> List.rev with
     | [] -> [1]
-    | h :: t -> t
+    | h :: t -> t (*h = 0 and t = [111...111]*)
     in
 
     let rec read_second_bits_compressed istr acc = 
         match ( read_bits_compressed istr acc (Some 0) ) |> List.rev with
     | [] -> [0]
-    | h :: t -> t
+    | h :: t -> t (*h = 1 and t = [000...000]*)
     in
 
     let in_ch = open_in fname in
@@ -72,7 +72,6 @@ let read_for_decompression fname =
     let temp_table = merge_keys_values temp_table_keys temp_table_values [] in
     let table = temp_table |> Huff_tree.huff_tree_with_arr_to_huff_tree_with_str in  
     
-    let _ = Bs.read_bit istr in
     let rec read_tab_of_compr_bits acc_res acc_bit=
         try 
             let bit = Bs.read_bit istr in

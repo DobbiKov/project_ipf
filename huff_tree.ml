@@ -115,10 +115,7 @@ let process_huff_tree_tab huff_tree =
     let h_t_2, s_bytes, s_comp_bits = sep_first_elem h_t_1 f_bytes (f_comp_bits @ [0]) in 
     let bytes, comp_bits = separate_lists h_t_2 s_bytes (s_comp_bits @ [1]) in
 
-    let last_bit = match ( comp_bits |> List.rev ) with [] -> 0 | h :: t -> if h = 0 then 1 else 0 in
-    (*we add in the bit called last bit and it must be complement of the true last bit that was in the list*)
-    (*the idea behind that is this approach make easier the decompression*)
-    bytes @ ( comp_bits @ [last_bit] )
+    bytes @ ( comp_bits )
 
 let rec is_compr_byte_in_tree_tab bits_str huff_tab = 
     match huff_tab with
