@@ -61,14 +61,7 @@ let count_occs in_arr =
 
 
 let construct_occs_table in_arr = 
-    (*making table of frequencies and sorting it by frequency of each char*)
-    let sort_count_occs l =
-        let comp el1 el2 =
-            compare (snd el1) (snd el2)
-        in
-        List.sort comp l
-    in
-    in_arr |> count_occs |> sort_count_occs
+    in_arr |> count_occs 
 
 let print_occ_list l =
     List.iter (fun x -> Printf.printf "(%c, %d)" ( (fst x) |> Char.chr ) (snd x)) l
