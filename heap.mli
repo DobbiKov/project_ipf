@@ -18,7 +18,10 @@ val remove_min : ('a, 'b) t -> ('a * 'b) * ('a, 'b) t
     the generic comparison [<] and [h] where that element has been removed. *)
 
 val is_singleton : ('a, 'b) t -> bool
-(** [is_singleton h] returns [true] if [h] contains one element *)
+(** [is_singleton h] returns [true] if [h] contains only one element *)
+
+val is_doubleton : ('a, 'b) t -> bool
+(** [is_singleton h] returns [true] if [h] contains only two elements *)
 
 val is_empty : ('a, 'b) t -> bool
 (** [is_empty h] returns [true] if [h] contains zero element *)

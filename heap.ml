@@ -6,6 +6,8 @@ let is_empty h = (h.size = 0)
 
 let is_singleton h = (h.size = 1)
 
+let is_doubleton h = (h.size = 2)
+
 
 let min_heapify h =
   let rec heapify i h =

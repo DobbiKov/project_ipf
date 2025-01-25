@@ -32,7 +32,7 @@ let decode_and_print_huffman_tree input_string =
     |> List.rev
   in
 
-  write_seq input_bytes;
+  input_bytes |> List.rev |> write_seq;
   
   let freq_table = txt_file |> Occ_arr.count_occs in
 
@@ -140,6 +140,7 @@ let () =
     String.init 10000 (fun _ -> 'a'); 
     "aaaabbbcc";             
     "abcdabcdabcdabcd";
+    "ab";
   ] in
 
   List.iter (fun test_string ->

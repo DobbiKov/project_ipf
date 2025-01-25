@@ -20,6 +20,10 @@ let construct_huff_tree l =
                Nil 
             else if Heap.is_singleton acc then (*if acc contains only one element, also no need to continue, we return only one element*)
                 Node (Leaf (acc |> Heap.remove_min |> fst |> fst),  Nil)
+            else if Heap.is_doubleton acc then (*if it contains only two elements, we return one on the left and one on the right*)
+                let h1, rest = Heap.remove_min acc in
+                let h2, t = Heap.remove_min rest in
+                Node (Leaf (fst h1), Leaf (fst h2))
             else begin 
                 let h1, rest = Heap.remove_min acc in
                 let h2, t = Heap.remove_min rest in
