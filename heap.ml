@@ -1,4 +1,4 @@
-type 'a t = { size: int; elements: 'a list }
+type ('a, 'b) t = { size: int; elements: ('a * 'b) list }
 
 let empty = { size = 0; elements = [] }
 
@@ -15,13 +15,13 @@ let min_heapify h =
     (* Find the smallest among the current node, left child, right child *)
     let smallest =
       match List.nth_opt h.elements left with
-      | Some v when v < List.nth h.elements i -> left
+      | Some v when (v |> snd) < (i |> List.nth h.elements |> snd) -> left
       | _ -> i
     in
     
     let smallest =
       match List.nth_opt h.elements right with
-      | Some v when v < List.nth h.elements smallest -> right
+      | Some v when (v |> snd) < (smallest |> List.nth h.elements |> snd)  -> right
       | _ -> smallest
     in
     
@@ -87,40 +87,41 @@ let () =
   assert (is_empty h);
   assert (not (is_singleton h));
 
-  let h = add 10 h in
-  assert (find_min h = 10);
+  let h = add ('a', 10) h in
+  assert (find_min h = ('a', 10));
   assert (is_singleton h);
 
-  let h = add 5 h in
-  assert (find_min h = 5);  
+  let h = add ('b', 5) h in
+  assert (find_min h = ('b', 5));  
 
-  let h = add 20 h in
-  assert (find_min h = 5);
-
-  let h = add 1 h in
-  assert (find_min h = 1);  
-
-  let h = add 7 h in
-  assert (find_min h = 1);
-
-  let (min1, h) = remove_min h in
-  assert (min1 = 1);
-  assert (find_min h = 5);
-
-  let (min2, h) = remove_min h in
-  assert (min2 = 5);
-  assert (find_min h = 7);
-
-  let (min3, h) = remove_min h in
-  assert (min3 = 7);
-  assert (find_min h = 10);
-
-  let (min4, h) = remove_min h in
-  assert (min4 = 10);
-  assert (find_min h = 20);
-
-  let (min5, h) = remove_min h in
-  assert (min5 = 20);
+  let h = add ('x', 20) h in
+  assert (find_min h = ('b', 5));
+  
+  let h = add ('a', 1) h in
+  assert (find_min h = ('a', 1));
+  
+  let h = add ('m', 7) h in
+  assert (find_min h = ('a', 1));
+  
+  let ((l1, min1), h) = remove_min h in
+  assert ((l1, min1) = ('a', 1));
+  assert (find_min h = ('b', 5));
+  
+  let ((l2, min2), h) = remove_min h in
+  assert ((l2, min2) = ('b', 5));
+  assert (find_min h = ('m', 7));
+  
+  let ((l3, min3), h) = remove_min h in
+  assert ((l3, min3) = ('m', 7));
+  assert (find_min h = ('a', 10));
+  
+  let ((l4, min4), h) = remove_min h in
+  assert ((l4, min4) = ('a', 10));
+  assert (find_min h = ('x', 20));
+  
+  let ((l5, min5), h) = remove_min h in
+  assert ((l5, min5) = ('x', 20));
   assert (is_empty h);
-
+  
   Printf.printf "success\n"
+  

@@ -1,3 +1,5 @@
+open Heap
+
 type 'a occ_table = ('a * int) list
 
 (* utilities *)
@@ -70,3 +72,12 @@ let construct_occs_table in_arr =
 
 let print_occ_list l =
     List.iter (fun x -> Printf.printf "(%c, %d)" ( (fst x) |> Char.chr ) (snd x)) l
+
+
+let occ_table_to_heap tbl =
+    min_heapify { size = List.length tbl; elements = tbl }
+      
+let construct_occs_heap in_arr =
+    in_arr |> construct_occs_table |> occ_table_to_heap
+
+

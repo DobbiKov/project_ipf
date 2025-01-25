@@ -27,6 +27,35 @@ let tree, res = Read_file.read_for_decompression "temp_file.txt.hf"
 let decompressed_bytes = Huff_tree.compressed_bytes_to_bytes tree res
 let () = List.iter (fun x -> x |> Char.chr |> Printf.printf "%c") decompressed_bytes 
 
+let () =
+    let occ_table = [  
+    (97, 45);  (* 'a' *)
+    (98, 13);  (* 'b' *)
+    (99, 12);  (* 'c' *)
+    (100, 16); (* 'd' *)
+    (101, 9);  (* 'e' *)    
+    (102, 5)   (* 'f' *)] in
+
+    let huff_tree = Huff_tree.construct_huff_tree occ_table in 
+
+    let huff_arr = Huff_tree.tree_to_arr_2 huff_tree in
+
+    let processed_bits = Huff_tree.process_huff_tree_tab huff_arr in
+
+
+
+    Printf.printf "Huffman Tree Array:\n";
+    List.iter (fun (byte, bits) ->
+        Printf.printf "Byte: %c, Bits: " (Char.chr byte);
+        List.iter (Printf.printf "%d") bits;
+        Printf.printf "\n"
+    ) huff_arr;
+
+    (* Print the processed bits *)
+    Printf.printf "\nProcessed Bits:\n";
+    print_bit_tab processed_bits;
+    Printf.printf "\nHuffman Tree Construction Test Successful.\n"
+
 (*let rec print_arr_of_bits arr = *)
 (*    match arr with*)
 (*    | [] -> ""*)

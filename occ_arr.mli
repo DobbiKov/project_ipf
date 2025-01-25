@@ -46,3 +46,14 @@ val find_min_in_sorted: 'a list -> 'a
 (**
    [find_min_in_sorted l] returns the smallest element in the sorted list
  *)
+
+
+val occ_table_to_heap : 'a occ_table -> ('a, int) Heap.t
+(**
+    [occ_table_to_heap l] takes a frequency table and returns a heap
+    *)
+
+val construct_occs_heap: 'a list -> ('a, int) Heap.t
+(**
+    [construct_occs_heap l] takes an array of bytes, constructs a frequency table and returns a heap
+    *)
