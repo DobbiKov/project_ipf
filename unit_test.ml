@@ -129,7 +129,7 @@ let () =
     "こんにちは世界";         
     String.init 10000 (fun _ -> 'a'); 
     "aaaabbbcc";             
-    "abcdabcdabcdabcd"
+    "abcdabcdabcdabcd";
   ] in
 
   List.iter (fun test_string ->
@@ -137,3 +137,69 @@ let () =
     let _ = decode_and_print_huffman_tree test_string in
     Printf.printf "====================\n\n"
   ) test_strings
+
+(*test heap*)
+let occ_table = [  
+    (97, 45);  (* 'a' *)
+    (98, 13);  (* 'b' *)
+    (99, 12);  (* 'c' *)
+    (100, 16); (* 'd' *)
+    (101, 9);  (* 'e' *)    
+    (102, 5)   (* 'f' *)] 
+
+let heap = Occ_arr.occ_table_to_heap occ_table
+
+let rec print_heap h = 
+    if Heap.is_empty h then ()
+    else begin
+        let min, rest = Heap.remove_min h in
+        Printf.printf "%c | %d\n" (min |> fst |> Char.chr) (min |> snd);
+        print_heap rest
+    end
+
+let () = print_heap heap
+
+
+let () = 
+  let h = Heap.empty in
+  assert (Heap.is_empty h);
+  assert (not (Heap.is_singleton h));
+
+  let h = Heap.add ('a', 10) h in
+  assert (Heap.find_min h = ('a', 10));
+  assert (Heap.is_singleton h);
+
+  let h = Heap.add ('b', 5) h in
+  assert (Heap.find_min h = ('b', 5));  
+
+  let h = Heap.add ('x', 20) h in
+  assert (Heap.find_min h = ('b', 5));
+  
+  let h = Heap.add ('a', 1) h in
+  assert (Heap.find_min h = ('a', 1));
+  
+  let h = Heap.add ('m', 7) h in
+  assert (Heap.find_min h = ('a', 1));
+  
+  let ((l1, min1), h) = Heap.remove_min h in
+  assert ((l1, min1) = ('a', 1));
+  assert (Heap.find_min h = ('b', 5));
+  
+  let ((l2, min2), h) = Heap.remove_min h in
+  assert ((l2, min2) = ('b', 5));
+  assert (Heap.find_min h = ('m', 7));
+  
+  let ((l3, min3), h) = Heap.remove_min h in
+  assert ((l3, min3) = ('m', 7));
+  assert (Heap.find_min h = ('a', 10));
+  
+  let ((l4, min4), h) = Heap.remove_min h in
+  assert ((l4, min4) = ('a', 10));
+  assert (Heap.find_min h = ('x', 20));
+  
+  let ((l5, min5), h) = Heap.remove_min h in
+  assert ((l5, min5) = ('x', 20));
+  assert (Heap.is_empty h);
+  
+  Printf.printf "success\n"
+  

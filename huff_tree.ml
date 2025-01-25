@@ -11,29 +11,56 @@ type compressed_byte = int list
 type 'a huff_tree_arr = (int * 'a) list
 
 let construct_huff_tree l =
-    let occ_heap = occ_table_to_heap l in
+    let heap = Occ_arr.occ_table_to_heap l in
 
-    (* Recursive function to combine trees using the min-heap *)
-    let rec combine_trees left right heap =
-        if Heap.is_empty heap then
-            Nil
-        else if Heap.is_singleton heap then
-            let (value, _) = Heap.find_min heap in
-            Leaf value
-        else
-            (* Remove two smallest elements from the heap *)
-            let (v1, freq1), heap1 = Heap.remove_min heap in
-            let (v2, freq2), heap2 = Heap.remove_min heap1 in
-            (* Combine them into a new Node *)
-            let combined_freq = freq1 + freq2 in
-            let new_tree = Node (Leaf v1, Leaf v2) in
-            (* Add the new Node back into the heap *)
-            (* Continue building the tree *)
-            combine_trees new_heap
+    let rec construct left right acc = 
+        match left, right with
+        | (_, Nil), _ -> begin (*if left subtree is not initialized yet*)
+            if Heap.is_empty acc then (*if acc is empty, there's nothing to construct the tree from,*)
+               Nil 
+            else if Heap.is_singleton acc then (*if acc contains only one element, also no need to continue, we return only one element*)
+                Node (Leaf (acc |> Heap.remove_min |> fst |> fst),  Nil)
+            else begin 
+                let h1, rest = Heap.remove_min acc in
+                let h2, t = Heap.remove_min rest in
+
+                let new_left_node = Node (Leaf (fst h1), Leaf (fst h2)) in
+                let new_left = ((snd h1) + (snd h2), new_left_node) in
+                construct new_left right t
+            end
+                
+        end
+        | _, (_, Nil) -> begin (*if right subtree is not initialized yet*) (*same logic applies here as for left*)
+            if Heap.is_empty acc then 
+               Node (snd left, Nil) 
+            else if Heap.is_singleton acc then
+                Node (snd left,  Leaf (acc |> Heap.remove_min |> fst |> fst))
+            else begin 
+                let h1, rest = Heap.remove_min acc in
+                let h2, t = Heap.remove_min rest in
+
+                let new_right_node = Node (Leaf (fst h1), Leaf (fst h2)) in
+                let new_right = ((snd h1) + (snd h2), new_right_node) in
+                construct left new_right t
+            end
+        end
+        | _, _ -> begin (*if both subtrees are initialized*)
+            if acc |> Heap.is_empty then Node (snd left, snd right) (*if acc is empty, then we used all the elements to construct the tree, return it*)
+            else
+            let h, t = acc |> Heap.remove_min in
+            if (fst left) <= (fst right) then (*if left has less frequency than the right one, we will place new node to the left*)
+                let new_left_node = Node (snd left, Leaf (fst h)) in
+                let new_left = ((fst left) + (snd h), new_left_node) in
+                construct new_left right t
+            else (*in the other case to the right*)
+                let new_right_node = Node (Leaf (fst h), snd right) in
+                let new_right = ((fst right) + (snd h), new_right_node) in
+                construct left new_right t
+        end
     in
 
-    (* Start building the Huffman tree *)
-    combine_trees occ_heap
+    construct (0, Nil) (0, Nil) heap 
+
 
 
 let tree_to_arr_2 tr = 

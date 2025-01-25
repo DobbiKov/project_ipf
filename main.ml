@@ -53,7 +53,7 @@ let () =
 
     (* Print the processed bits *)
     Printf.printf "\nProcessed Bits:\n";
-    print_bit_tab processed_bits;
+    Huff_tree.print_bit_tab processed_bits;
     Printf.printf "\nHuffman Tree Construction Test Successful.\n"
 
 (*let rec print_arr_of_bits arr = *)
