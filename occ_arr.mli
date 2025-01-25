@@ -1,14 +1,16 @@
 type 'a occ_table = ('a * int) list
 
-val count_occs: 'a list -> 'a occ_table
+val count_occs: string -> int occ_table
     (**
-    [count_occs in_arr] takes an array of bytes (that represent chars) 
-and returns an array if form [(byte, frequency), ] of frequency of each char
+    [count_occs in_arr] takes a filename
+and returns an array of form [(byte, frequency), ] of frequency of each char
      *)
 
-val construct_occs_table: 'a list -> 'a occ_table
+val bad_count_occs: 'a list -> 'a occ_table
+
+val construct_occs_table: 'a list-> 'a occ_table
 (**
-    [construct_occs_table in_arr] takes an array of bytes, construct an array of frequencies and sorts it
+    [construct_occs_table in_arr] takes an array of bytes and construct an array of frequencies and sorts it
     returns an array of form [(char, int(frequency)), ]
         *)
 
@@ -53,7 +55,7 @@ val occ_table_to_heap : 'a occ_table -> ('a, int) Heap.t
     [occ_table_to_heap l] takes a frequency table and returns a heap
     *)
 
-val construct_occs_heap: 'a list -> ('a, int) Heap.t
+val construct_occs_heap: string -> (int, int) Heap.t
 (**
-    [construct_occs_heap l] takes an array of bytes, constructs a frequency table and returns a heap
+    [construct_occs_heap l] takes a file name, constructs a frequency table and returns a heap
     *)

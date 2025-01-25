@@ -37,7 +37,8 @@ let find_min_in_sorted = function
 
 (* other part *)
 
-let count_occs in_arr = 
+let count_occs file_name = 
+    let in_ch = open_in file_name in
     (* returns an array of format [( byte(char), int(frequency) ), ...]*)
     let rec count_for_one_byte acc elem acc2 =
         (*counts a number of occurencies of the element [elem] in the [acc]*)
@@ -57,11 +58,41 @@ let count_occs in_arr =
     let f acc x = 
         count_for_one_byte acc x []
     in
-    List.fold_left f [] in_arr 
+    let rec spec_fold_left op acc =
+        try
+            let next_byte = input_byte in_ch in
+            spec_fold_left op (op acc next_byte)
+        with 
+        | _ -> acc 
+    in
+        
+    let res = spec_fold_left f [] in 
+    close_in in_ch;
+    res
 
+let bad_count_occs in_arr = 
+    (* returns an array of format [( byte(char), int(frequency) ), ...]*)
+    let rec count_for_one_byte arr l acc =
+        match arr with
+        | [] -> begin 
+            match acc with
+            | [] -> [(l, 1)]
+            | h :: t -> (l, 1) :: acc
+        end
+        | h :: t -> (
+            if (fst h) == l then
+                 ((l, (snd h) + 1) :: acc) @ t
+            else count_for_one_byte t l (h :: acc)
+        )
+    in
+
+    let f acc x = 
+        count_for_one_byte acc x []
+    in
+    List.fold_left f [] in_arr
 
 let construct_occs_table in_arr = 
-    in_arr |> count_occs 
+    in_arr |> bad_count_occs 
 
 let print_occ_list l =
     List.iter (fun x -> Printf.printf "(%c, %d)" ( (fst x) |> Char.chr ) (snd x)) l
@@ -70,7 +101,7 @@ let print_occ_list l =
 let occ_table_to_heap tbl =
     min_heapify { size = List.length tbl; elements = tbl }
       
-let construct_occs_heap in_arr =
-    in_arr |> construct_occs_table |> occ_table_to_heap
+let construct_occs_heap file_name =
+    file_name |> count_occs |> occ_table_to_heap
 
 

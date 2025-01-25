@@ -1,10 +1,18 @@
 open Occ_arr
 open Huff_tree
-open Write_file
-open Read_file
 
 let decode_and_print_huffman_tree input_string =
   (* print function *)
+    let txt_file = "temp_unit_test_file.txt" in
+    let hf_file = "temp_unit_test_file.txt.hf" in
+
+    let write_seq seq =
+        let och = open_out txt_file in
+        List.iter (fun x -> output_byte och x) seq;
+        close_out och;
+        ()
+    in 
+
   let rec print_huffman_tree tree indent =
     match tree with
     | Nil -> Printf.printf "%sNil\n" indent
@@ -24,8 +32,9 @@ let decode_and_print_huffman_tree input_string =
     |> List.rev
   in
 
+  write_seq input_bytes;
   
-  let freq_table = construct_occs_table input_bytes in
+  let freq_table = txt_file |> Occ_arr.count_occs in
 
   Printf.printf "=== Occurrence Table ===\n";
   print_occ_list freq_table;
@@ -79,39 +88,40 @@ let decode_and_print_huffman_tree input_string =
   else
     Printf.printf "❌ Error\n";
 
-  let compressed_file_name = "test.hf" in
-  write_compressed_file compressed_file_name arr2 input_bytes;
-  Printf.printf "Compressed file written: %s\n" compressed_file_name;
+    let new_txt_file = "temp_unit_test_file_decompressed.txt" in
+    let huff_tab = txt_file |> Occ_arr.count_occs |> Huff_tree.construct_huff_tree |> Huff_tree.tree_to_arr_2 in
+    Read_write_file.write_compressed_file hf_file huff_tab txt_file;
+  Printf.printf "Compressed file written: %s\n" hf_file;
 
-  let decompressed_file_name = "test_decompressed.txt" in
-  write_decompressed_file decompressed_file_name arr2 compressed_bits;
-  Printf.printf "Decompressed file written: %s\n" decompressed_file_name;
+  Read_write_file.read_and_write_for_decompression hf_file new_txt_file;
+  Printf.printf "Decompressed file written: %s\n" new_txt_file;
 
-  let (read_huff_table, final_compressed_bits) = read_for_decompression compressed_file_name in
-  let decompressed_bytes = compressed_bytes_to_bytes read_huff_table final_compressed_bits in
-  let decompressed_string = 
-    decompressed_bytes 
-    |> List.map Char.chr 
-    |> List.to_seq 
-    |> String.of_seq 
-  in
+      let bef_ich = open_in txt_file in
+      let aft_ich = open_in new_txt_file in
+  let rec compare_before_after_compression () =
+    try 
+        let bef_byte = input_byte bef_ich in 
+        try 
+            let aft_byte = input_byte aft_ich in
 
-  Printf.printf "=== Input Bytes ===\n";
-  List.iter (fun byte -> Printf.printf "%d " byte) input_bytes;
-  Printf.printf "\n\n";
-  Printf.printf "=== Decompressed Bytes ===\n";
-  List.iter (fun byte -> Printf.printf "%d " byte) decompressed_bytes;
-  List.iter (Printf.printf "%s") final_compressed_bits;
-  Printf.printf "\n\n";
+            if bef_byte != aft_byte then begin false end
+            else compare_before_after_compression ()
+        with | _ -> Printf.printf "finished but why: %c" (bef_byte |> Char.chr); false
+    with | _ -> begin
+        try
+            let _ = input_byte aft_ich in
+            false
+        with | _ -> true
+    end
+    in
+    let is_same = compare_before_after_compression () in
+    close_in bef_ich;
+    close_in aft_ich;
 
-  if decompressed_string = input_string then
-    Printf.printf "✅ Success: decompressed string matches input.\n\n"
-  else
-    Printf.printf "❌ Error: decompressed string does NOT match input.\n%s_%s\n" input_string decompressed_string;
-  ()
-  
-
-
+    match is_same with
+    | true -> Printf.printf "✅ Success: decompressed string matches input.\n\n";
+    | false ->Printf.printf "❌ Error: decompressed string does NOT match input.\n\n";
+    ()
 (* Example usage: *)
 let () =
   let test_strings = [

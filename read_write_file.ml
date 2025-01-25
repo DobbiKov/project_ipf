@@ -1,16 +1,4 @@
-let read_for_compression fname = 
-  let ic = open_in fname in
-  let rec loop acc =
-      try
-          let byte = input_byte ic in
-          loop (byte :: acc)
-      with End_of_file ->
-          close_in ic;
-          acc
-  in
-  loop [] 
-
-let read_for_decompression fname = 
+let read_and_write_for_decompression fname fname_out = 
     let rec read_bits_compressed istr acc main_bit = 
         (*read bits (0s and 1s) till it finds a change of the bit (i.e if there was 11110 it stops when it encounters 0) *)
         let bit = Bs.read_bit istr in
@@ -72,7 +60,8 @@ let read_for_decompression fname =
     let temp_table = merge_keys_values temp_table_keys temp_table_values [] in
     let table = temp_table |> Huff_tree.huff_tree_with_arr_to_huff_tree_with_str in  
     
-    let rec read_tab_of_compr_bits acc_res acc_bit=
+    let och = open_out fname_out in
+    let rec read_tab_of_compr_bits_and_write acc_bit=
         try 
             let bit = Bs.read_bit istr in
             let new_acc_bit = bit :: acc_bit in
@@ -81,13 +70,53 @@ let read_for_decompression fname =
             let bits_str = Huff_tree.bit_tab_to_str bits_tab in
             let is_in_tab = Huff_tree.is_compr_byte_in_tree_tab bits_str table in
             match is_in_tab with
-            | false -> read_tab_of_compr_bits acc_res new_acc_bit
+            | false -> read_tab_of_compr_bits_and_write  new_acc_bit
             | true -> 
-                    read_tab_of_compr_bits (bits_str :: acc_res) []
+                    begin
+                        let byte = Huff_tree.get_byte_in_huff_tree_tab table bits_str in
+                        byte |> output_byte och;
+                        read_tab_of_compr_bits_and_write []
+                    end
 
         with 
-        | _ -> acc_res |> List.rev
+        | _ -> ()
     in
-    let res = read_tab_of_compr_bits [] [] in
+    read_tab_of_compr_bits_and_write [];
+    close_out och;
     close_in in_ch;
-    ( table, res )
+    ()
+
+let write_compressed_file fname huff_table old_file_name =
+  let och = open_out fname in
+  let o_str = Bs.of_out_channel och in
+  let tab_len = List.length huff_table in
+
+  let rec write_bits_tab = function
+      | [] -> ()
+      | h :: t -> 
+
+              Bs.write_bit o_str h; 
+              write_bits_tab t
+  in 
+
+  tab_len |> Occ_arr.int_to_bits |> write_bits_tab;
+
+  let huff_arr_to_write = Huff_tree.process_huff_tree_tab huff_table in   
+  write_bits_tab huff_arr_to_write;
+
+  (*writing data*)
+  let ich = open_in old_file_name in
+  let rec write_comp_bytes () = 
+      try
+          let byte = input_byte ich in
+          byte |> Huff_tree.get_compressed_byte_in_huff_tree_tab huff_table |> write_bits_tab;
+          write_comp_bytes ()
+      with 
+      | _ -> ()
+  in
+
+  write_comp_bytes ();
+  close_in ich;
+  Bs.finalize o_str;
+  close_out och;
+  ()
