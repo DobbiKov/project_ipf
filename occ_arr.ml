@@ -58,17 +58,20 @@ let count_occs file_name =
     let f acc x = 
         count_for_one_byte acc x []
     in
-    let rec spec_fold_left op acc =
-        try
-            let next_byte = input_byte in_ch in
-            spec_fold_left op (op acc next_byte)
-        with 
-        | _ -> acc 
+
+    let res = ref [] in
+        let _ = try 
+            while true do
+                let next_byte = input_byte in_ch in
+                res := f (!res) next_byte;
+            done
+        with | _ -> ();
     in
-        
-    let res = spec_fold_left f [] in 
+
     close_in in_ch;
-    res
+
+    let res2 = !res in
+    res2
 
 let bad_count_occs in_arr = 
     (* returns an array of format [( byte(char), int(frequency) ), ...]*)
