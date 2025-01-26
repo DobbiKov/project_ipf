@@ -11,6 +11,20 @@ let rec byte_to_string btt =
     in
     aux btt 32768 
 
+let occ_table = "test_files/equal.txt" |> Occ_arr.count_occs 
+let () = List.iter (fun (a, b) -> Printf.printf "%c %d\n" (a |> Char.chr) b) occ_table
+
+let heap = occ_table |> Occ_arr.occ_table_to_heap
+
+let rec print_heap h = 
+    if Heap.is_empty h then ()
+    else begin
+        let min, rest = Heap.remove_min h in
+        Printf.printf "h: %c %d\n" (min |> fst |> Char.chr) (min |> snd);
+        print_heap rest
+    end
+let () = print_heap heap
+    
 
 let () =
     let occ_table = [  

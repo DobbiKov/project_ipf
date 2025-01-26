@@ -106,16 +106,14 @@ let write_compressed_file fname huff_table old_file_name =
 
   (*writing data*)
   let ich = open_in old_file_name in
-  let rec write_comp_bytes () = 
-      try
+  try
+      while true do
           let byte = input_byte ich in
           byte |> Huff_tree.get_compressed_byte_in_huff_tree_tab huff_table |> write_bits_tab;
-          write_comp_bytes ()
-      with 
-      | _ -> ()
-  in
+      done
+  with 
+  | _ -> ();
 
-  write_comp_bytes ();
   close_in ich;
   Bs.finalize o_str;
   close_out och;
