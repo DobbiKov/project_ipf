@@ -23,3 +23,13 @@ The project's goal is to write a CLI tool to compress and decompress files using
 - **huff.ml** - main file of the app that manages CLI logic
 - **main.ml** - main entry to test everything
 - **test_files** - folder with different text files to test the program
+
+## Usage
+1. Build the program: `dune build`
+2. Run tests: `./_build/default/unit_test.exe`
+3. Compress file: `./_build/default/huff.exe <file name>.txt`
+4. Decompress file: `./_build/default/huff.exe <file name>.hf`
+5. See stats of compression:  `./_build/default/huff.exe --stats <file name>.txt`
+
+There're some txt files in `test_files` directoty where you can test different files.
+
