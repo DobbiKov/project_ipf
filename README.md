@@ -14,12 +14,12 @@ The project's goal is to write a CLI tool to compress and decompress files using
 4. Execute the file, for example to see the help, write: `dune exec ./huff.exe --help`
 
 ## Docs
-- bs.ml* - module for reading and writing data to a file
-- heap.ml* - module with min_heap implemenation to reduce complexity of construction a huff_tree
-- read_file.ml* - module with functions to read files
-- write_file.ml* - module with function to write files
-- occ_arr.ml* - module for managing table of occurencies
-- huff_tree.ml* - module for managing huffman tree 
-- huffman.ml* - module managing compressing, decompressing and stats logic
-- huff.ml* - main file of the app that manages CLI logic
-- main.ml* - main entry to test everything
+- **bs.ml** - module for reading and writing data to a file
+- **heap.ml** - module with min_heap implemenation to reduce complexity of construction a huff_tree
+- **read_write_file.ml** - module with functions to read and write files with (de)compression algorithms
+- **occ_arr.ml** - module for managing table of occurencies
+- **huff_tree.ml** - module for managing huffman tree 
+- **huffman.ml** - module managing compressing, decompressing and stats logic
+- **huff.ml** - main file of the app that manages CLI logic
+- **main.ml** - main entry to test everything
+- **test_files** - folder with different text files to test the program
