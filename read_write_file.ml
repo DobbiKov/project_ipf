@@ -61,27 +61,29 @@ let read_and_write_for_decompression fname fname_out =
     let table = temp_table |> Huff_tree.huff_tree_with_arr_to_huff_tree_with_str in  
     
     let och = open_out fname_out in
-    let rec read_tab_of_compr_bits_and_write acc_bit=
-        try 
-            let bit = Bs.read_bit istr in
-            let new_acc_bit = bit :: acc_bit in
+    try 
+        while true do
+        let rec read_tab_of_compr_bits_and_write acc_bit=
+                let bit = Bs.read_bit istr in
+                let new_acc_bit = bit :: acc_bit in
 
-            let bits_tab = new_acc_bit |> List.rev in
-            let bits_str = Huff_tree.bit_tab_to_str bits_tab in
-            let is_in_tab = Huff_tree.is_compr_byte_in_tree_tab bits_str table in
-            match is_in_tab with
-            | false -> read_tab_of_compr_bits_and_write  new_acc_bit
-            | true -> 
-                    begin
-                        let byte = Huff_tree.get_byte_in_huff_tree_tab table bits_str in
-                        byte |> output_byte och;
-                        read_tab_of_compr_bits_and_write []
-                    end
+                let bits_tab = new_acc_bit |> List.rev in
+                let bits_str = Huff_tree.bit_tab_to_str bits_tab in
+                let is_in_tab = Huff_tree.is_compr_byte_in_tree_tab bits_str table in
+                match is_in_tab with
+                | false -> read_tab_of_compr_bits_and_write  new_acc_bit
+                | true -> 
+                        begin
+                            let byte = Huff_tree.get_byte_in_huff_tree_tab table bits_str in
+                            byte |> output_byte och;
+                        end
 
-        with 
-        | _ -> ()
-    in
-    read_tab_of_compr_bits_and_write [];
+                            in
+                            ();
+        read_tab_of_compr_bits_and_write [];
+        done
+    with 
+    | _ -> ();
     close_out och;
     close_in in_ch;
     ()
