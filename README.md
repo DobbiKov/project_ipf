@@ -1,4 +1,4 @@
-# OCaml Project
+# Huffman text compression script
 
 ## Authors
 - Yehor KOROTENKO (yehor.korotenko@etu-upsaclay.fr)
